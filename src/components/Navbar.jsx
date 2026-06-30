@@ -1,30 +1,15 @@
-import { BriefcaseBusiness, Home, Users } from 'lucide-react';
+import { Database } from 'lucide-react';
 
-const navItems = [
-  { id: 'home', label: 'Inicio', icon: Home },
-  { id: 'jobs', label: 'Ofertas', icon: BriefcaseBusiness },
-  { id: 'professionals', label: 'Profesionales', icon: Users },
-];
-
-export function Navbar({ activePage, currentTitle, onNavigate }) {
+export function Navbar() {
   return (
     <header className="navbar">
-      <button className="brand" onClick={() => onNavigate('home')} aria-label="Ir al inicio">
-        <span className="brand-mark">SM</span>
+      <div className="brand" aria-label="BD1 consultas">
+        <span className="brand-mark"><Database size={20} /></span>
         <span>
-          <strong>SkillMatch</strong>
-          <small>{currentTitle}</small>
+          <strong>BD1 Consultas</strong>
+          <small>PostgreSQL + Express</small>
         </span>
-      </button>
-
-      <nav className="nav-links" aria-label="Navegacion principal">
-        {navItems.map(({ id, label, icon: Icon }) => (
-          <button key={id} className={activePage === id ? 'nav-link active' : 'nav-link'} onClick={() => onNavigate(id)}>
-            <Icon size={18} />
-            <span>{label}</span>
-          </button>
-        ))}
-      </nav>
+      </div>
     </header>
   );
 }

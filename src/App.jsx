@@ -1,46 +1,100 @@
+import { useEffect, useState } from 'react';
+import { Database, Server } from 'lucide-react';
 import { Navbar } from './components/Navbar.jsx';
-import { HomePage } from './pages/HomePage.jsx';
-import { JobsPage } from './pages/JobsPage.jsx';
-import { JobDetailPage } from './pages/JobDetailPage.jsx';
-import { ProfessionalsPage } from './pages/ProfessionalsPage.jsx';
-import { ProfessionalProfilePage } from './pages/ProfessionalProfilePage.jsx';
-import { useNavigation } from './hooks/useNavigation.js';
-
-const pageTitle = {
-  home: 'Inicio',
-  jobs: 'Ofertas laborales',
-  jobDetail: 'Detalle de oferta',
-  professionals: 'Profesionales',
-  professionalProfile: 'Perfil profesional',
-};
+import { QueryRunner } from './components/QueryRunner.jsx';
+import { checkHealth, fetchQueries, runQuery } from './services/apiClient.js';
 
 export default function App() {
-  const navigation = useNavigation('home');
+  const [queries, setQueries] = useState([]);
+  const [health, setHealth] = useState(null);
+  const [initialError, setInitialError] = useState('');
+  const [loadingQueryId, setLoadingQueryId] = useState('');
+  const [results, setResults] = useState({});
+  const [errors, setErrors] = useState({});
 
-  const renderPage = () => {
-    if (navigation.page === 'jobs') {
-      return <JobsPage onOpenJob={navigation.openJob} />;
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadInitialData() {
+      try {
+        const [healthResponse, queriesResponse] = await Promise.all([
+          checkHealth(),
+          fetchQueries(),
+        ]);
+
+        if (!mounted) return;
+        setHealth(healthResponse);
+        setQueries(queriesResponse.queries);
+      } catch (error) {
+        if (!mounted) return;
+        setInitialError(error.message);
+      }
     }
 
-    if (navigation.page === 'jobDetail') {
-      return <JobDetailPage jobId={navigation.params.jobId} onBack={() => navigation.goTo('jobs')} onOpenProfessional={navigation.openProfessional} />;
-    }
+    loadInitialData();
 
-    if (navigation.page === 'professionals') {
-      return <ProfessionalsPage onOpenProfessional={navigation.openProfessional} />;
-    }
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
-    if (navigation.page === 'professionalProfile') {
-      return <ProfessionalProfilePage professionalId={navigation.params.professionalId} onBack={() => navigation.goTo('professionals')} onOpenJob={navigation.openJob} />;
-    }
+  const handleRunQuery = async (queryId) => {
+    setLoadingQueryId(queryId);
+    setErrors((current) => ({ ...current, [queryId]: '' }));
 
-    return <HomePage onOpenJobs={() => navigation.goTo('jobs')} onOpenProfessionals={() => navigation.goTo('professionals')} onOpenJob={navigation.openJob} onOpenProfessional={navigation.openProfessional} />;
+    try {
+      const response = await runQuery(queryId);
+      setResults((current) => ({ ...current, [queryId]: response }));
+    } catch (error) {
+      setErrors((current) => ({ ...current, [queryId]: error.message }));
+    } finally {
+      setLoadingQueryId('');
+    }
   };
 
   return (
     <div className="app-shell">
-      <Navbar activePage={navigation.page} currentTitle={pageTitle[navigation.page]} onNavigate={navigation.goTo} />
-      <main className="main-content">{renderPage()}</main>
+      <Navbar />
+      <main className="main-content">
+        <section className="page-stack">
+          <div className="page-heading dashboard-heading">
+            <div>
+              <p className="eyebrow">BD1 PostgreSQL + Express</p>
+              <h1>Consultas del proyecto</h1>
+              <p>Ejecuta las consultas SQL del proyecto contra la base de datos PostgreSQL real.</p>
+            </div>
+            <div className="connection-status">
+              <Database size={18} />
+              <span>{health?.database === 'connected' ? 'Base conectada' : 'Verificando base'}</span>
+            </div>
+          </div>
+
+          {initialError && (
+            <div className="error-box">
+              <strong>No se pudo cargar la aplicación</strong>
+              <span>{initialError}</span>
+            </div>
+          )}
+
+          {!initialError && !queries.length && (
+            <div className="loading-box">
+              <Server size={18} />
+              Cargando consultas desde la API...
+            </div>
+          )}
+
+          {queries.map((query) => (
+            <QueryRunner
+              key={query.id}
+              query={query}
+              result={results[query.id]}
+              loading={loadingQueryId === query.id}
+              error={errors[query.id]}
+              onRun={handleRunQuery}
+            />
+          ))}
+        </section>
+      </main>
     </div>
   );
 }

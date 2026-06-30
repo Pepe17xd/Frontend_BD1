@@ -23,6 +23,11 @@ button {
   cursor: pointer;
 }
 
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
 .app-shell {
   min-height: 100vh;
 }
@@ -122,6 +127,20 @@ button {
 
 .dashboard-heading {
   background: #ffffff;
+}
+
+.connection-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 0 12px;
+  color: #176449;
+  background: #dff3e8;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 800;
+  white-space: nowrap;
 }
 
 .page-heading h1,
@@ -258,6 +277,106 @@ button {
   margin: 0 0 16px;
   font-size: 20px;
   letter-spacing: 0;
+}
+
+.query-card {
+  display: grid;
+  gap: 18px;
+}
+
+.query-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.query-card-header h2 {
+  margin-bottom: 8px;
+}
+
+.query-card-header p {
+  margin: 0;
+  color: #5d6963;
+  line-height: 1.5;
+}
+
+.query-result {
+  display: grid;
+  gap: 14px;
+}
+
+.result-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.result-meta span {
+  display: inline-flex;
+  gap: 6px;
+  padding: 8px 10px;
+  color: #43504a;
+  background: #f1f3ef;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.table-scroll {
+  overflow-x: auto;
+  border: 1px solid #dfe5dd;
+  border-radius: 8px;
+}
+
+.results-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #ffffff;
+  font-size: 14px;
+}
+
+.results-table th,
+.results-table td {
+  padding: 12px;
+  border-bottom: 1px solid #e7ece5;
+  text-align: left;
+  vertical-align: top;
+  white-space: nowrap;
+}
+
+.results-table th {
+  color: #17211d;
+  background: #f1f3ef;
+  font-weight: 800;
+}
+
+.results-table tr:last-child td {
+  border-bottom: 0;
+}
+
+.loading-box,
+.error-box,
+.empty-table {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 8px;
+}
+
+.loading-box,
+.empty-table {
+  color: #43504a;
+  background: #f1f3ef;
+  border: 1px solid #dde4dc;
+}
+
+.error-box {
+  align-items: flex-start;
+  flex-direction: column;
+  color: #8a1f1f;
+  background: #fff0f0;
+  border: 1px solid #f0c4c4;
 }
 
 .compact-list,
@@ -468,7 +587,8 @@ button {
   .page-heading,
   .detail-hero,
   .profile-hero,
-  .heading-actions {
+  .heading-actions,
+  .query-card-header {
     align-items: stretch;
     flex-direction: column;
   }
